@@ -28,13 +28,10 @@ It reads domain lists from plain text config files, runs checks in parallel, and
 - Uses RDAP and WHOIS fallback for global domains
 - Uses register.domains.lk API helper for .lk domains
 - Normalizes registrar names (for cleaner reporting)
-- Pre-run config validator and auto-fixer
 - Validates malformed entries
 - Removes duplicates
 - Normalizes values (lowercase, strips protocol/path/www)
 - Optional DNS reachability checks
-- Rewrites cleaned files in place
-- JSON outputs for dashboard/CI usage
 
 ## Project Files
 
