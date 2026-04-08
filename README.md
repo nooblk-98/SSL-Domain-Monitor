@@ -51,9 +51,6 @@ It reads domain lists from plain text config files, runs checks in parallel, and
 
 ### domains.conf
 
-Repository link:
-https://github.com/weblankan-lk/webLankan_ssl_checker/blob/main/domains.conf
-
 Purpose:
 
 - Used by the domain expiry checker
@@ -77,9 +74,6 @@ What the tool does automatically:
 - Deduplicates entries
 
 ### ssl.conf
-
-Repository link:
-https://github.com/weblankan-lk/webLankan_ssl_checker/blob/main/ssl.conf
 
 Purpose:
 
