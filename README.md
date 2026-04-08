@@ -180,4 +180,37 @@ Domain expiry status values commonly include:
 2. Run `python3 src/validate_conf.py`.
 3. Run SSL and domain checks.
 4. Use `ssl_results.json` and `domain_results.json` in your dashboard/automation.
- 
+
+## GitHub Actions Automation
+
+The repository includes a GitHub Actions workflow (`.github/workflows/ssl-check.yml`) that runs checks automatically and deploys the dashboard to Cloudflare Pages.
+
+### Schedule
+
+Runs automatically every day at **06:00 Asia/Colombo (UTC+5:30)**, equivalent to **00:30 UTC**.
+
+Can also be triggered manually from the GitHub Actions tab using the **workflow_dispatch** option.
+
+### What the workflow does
+
+1. Validates `ssl.conf` and `domains.conf`
+2. Runs SSL certificate checks → updates `ssl_results.json`
+3. Runs domain expiry checks → updates `domain_results.json`
+4. Commits the updated result files back to the `main` branch
+5. Deploys the dashboard to Cloudflare Pages
+
+### Required GitHub Secrets
+
+Add these secrets to your repository under **Settings → Secrets and variables → Actions**:
+
+| Secret | Description |
+|---|---|
+| `CLOUDFLARE_API_TOKEN` | Cloudflare API token with Pages edit permission |
+| `CLOUDFLARE_ACCOUNT_ID` | Your Cloudflare account ID |
+
+### Live Dashboard
+
+The dashboard is deployed to Cloudflare Pages and updates automatically after each workflow run:
+
+**https://ssl-domain-monitor.pages.dev**
+
