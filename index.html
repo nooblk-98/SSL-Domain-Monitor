@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>webLankan Monitor — SSL & Domain</title>
+  <style>
+    :root {
+      --bg:      #090b12;
+      --bg2:     #0d1018;
+      --surface: #111520;
+      --card:    #161b2e;
+      --border:  #1f2640;
+      --border2: #252d47;
+      --text:    #e4eaf6;
+      --muted:   #6b7899;
+      --muted2:  #4a5470;
+      --green:   #22c55e;
+      --yellow:  #f59e0b;
+      --orange:  #f97316;
+      --red:     #ef4444;
+      --blue:    #4f8ef7;
+      --purple:  #8b5cf6;
+    }
+    [data-theme="light"] {
+      --bg:      #f0f2f7;
+      --bg2:     #e8eaf2;
+      --surface: #ffffff;
+      --card:    #ffffff;
+      --border:  #d1d8e8;
+      --border2: #bac4da;
+      --text:    #1a2035;
+      --muted:   #6b7899;
+      --muted2:  #8e9ab8;
+      --green:   #16a34a;
+      --yellow:  #d97706;
+      --orange:  #ea6c0a;
+      --red:     #dc2626;
+      --blue:    #2563eb;
+      --purple:  #7c3aed;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; -webkit-font-smoothing: antialiased; transition: background 0.2s, color 0.2s; }
+
+    /* ── TOP BAR ── */
+    .topbar {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(9,11,18,0.94);
+      backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+      padding: 0 32px;
+      display: flex; align-items: center;
+      height: 62px;
+      transition: background 0.2s, border-color 0.2s;
+    }
+    [data-theme="light"] .topbar { background: rgba(240,242,247,0.95); }
+
+    /* ── THEME TOGGLE ── */
+    .theme-toggle {
+      height: 30px; padding: 0 10px; border-radius: 99px;
+      border: 1px solid var(--border2); background: var(--card);
+      color: var(--muted); cursor: pointer;
+      display: flex; align-items: center; gap: 5px;
+      font-size: 0.85rem; transition: all 0.15s; flex-shrink: 0;
+      white-space: nowrap;
+    }
+    .theme-toggle:hover { border-color: var(--blue); color: var(--blue); }
+    .brand { display: flex; align-items: center; gap: 11px; flex-shrink: 0; margin-right: 28px; }
+    .brand-logo { height: 32px; width: auto; display: block; flex-shrink: 0; }
+    .brand-sub  { font-size: 0.62rem; color: var(--muted); letter-spacing: 0.08em; text-transform: uppercase; }
+
+    .nav-tabs { display: flex; align-items: stretch; height: 62px; gap: 0; flex: 1; }
+    .nav-tab {
+      display: flex; align-items: center; gap: 8px;
+      padding: 0 22px; border: none; background: none;
+      color: var(--muted); font-size: 0.85rem; font-weight: 600;
+      cursor: pointer; position: relative; transition: color 0.15s; white-space: nowrap;
+    }
+    .nav-tab::after {
+      content: ''; position: absolute; bottom: 0; left: 16px; right: 16px; height: 2px;
+      background: var(--blue); border-radius: 2px 2px 0 0;
+      transform: scaleX(0); transition: transform 0.2s;
+    }
+    .nav-tab.active { color: var(--text); }
+    .nav-tab.active::after { transform: scaleX(1); }
+    .nav-tab:hover:not(.active) { color: #a0accc; }
+    .nav-badge {
+      background: var(--border2); color: var(--muted); border-radius: 99px;
+      padding: 2px 8px; font-size: 0.68rem; font-weight: 700; line-height: 1.4; transition: all 0.15s;
+    }
+    .nav-tab.active .nav-badge { background: var(--blue); color: #fff; }
+    .nav-tab-short { display: none; }
+
+    .topbar-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; margin-left: auto; }
+    .theme-label { font-size: 0.72rem; font-weight: 600; }
+    .updated-pill {
+      display: flex; align-items: center; gap: 6px;
+      background: var(--card); border: 1px solid var(--border2);
+      border-radius: 99px; padding: 5px 14px; font-size: 0.72rem; color: var(--muted);
+    }
+    .live-dot {
+      width: 7px; height: 7px; border-radius: 50%;
+      background: var(--green); box-shadow: 0 0 7px var(--green);
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
+
+    /* ── PAGE ── */
+    .page { padding: 24px 32px 56px; }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    /* ── STAT CARDS ── */
+    .stats-row {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(148px,1fr));
+      gap: 12px; margin-bottom: 20px;
+    }
+    .stat-card {
+      background: var(--card); border: 1px solid var(--border); border-radius: 13px;
+      padding: 18px 20px; position: relative; overflow: hidden;
+      transition: border-color 0.2s, transform 0.15s;
+    }
+    .stat-card:hover { transform: translateY(-2px); border-color: var(--border2); }
+    .stat-card::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; border-radius: 13px 13px 0 0;
+    }
+    .sc-total::before  { background: var(--blue); }
+    .sc-ok::before     { background: var(--green); }
+    .sc-warn::before   { background: var(--yellow); }
+    .sc-urgent::before { background: var(--orange); }
+    .sc-exp::before    { background: var(--red); }
+    .sc-err::before    { background: var(--muted2); }
+    .stat-lbl { font-size: 0.64rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); margin-bottom: 8px; font-weight: 600; }
+    .stat-val { font-size: 2.1rem; font-weight: 800; line-height: 1; letter-spacing: -0.025em; }
+    .sc-total  .stat-val { color: var(--blue); }
+    .sc-ok     .stat-val { color: var(--green); }
+    .sc-warn   .stat-val { color: var(--yellow); }
+    .sc-urgent .stat-val { color: var(--orange); }
+    .sc-exp    .stat-val { color: var(--red); }
+    .sc-err    .stat-val { color: var(--muted); }
+    .stat-sub { font-size: 0.67rem; color: var(--muted2); margin-top: 5px; }
+
+    /* ── TABLE CARD ── */
+    .table-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; }
+    .controls {
+      display: flex; gap: 10px; flex-wrap: wrap; align-items: center;
+      padding: 14px 18px; border-bottom: 1px solid var(--border); background: var(--surface);
+    }
+    .search-wrap { position: relative; flex: 1; min-width: 180px; max-width: 300px; }
+    .search-wrap svg { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); color: var(--muted2); pointer-events: none; }
+    input[type="search"] {
+      width: 100%; padding: 8px 10px 8px 34px; background: var(--bg2);
+      border: 1px solid var(--border2); border-radius: 8px; color: var(--text);
+      font-size: 0.82rem; outline: none; transition: border-color 0.15s;
+    }
+    input[type="search"]:focus { border-color: var(--blue); }
+    input[type="search"]::placeholder { color: var(--muted2); }
+    .filter-group { display: flex; gap: 4px; flex-wrap: wrap; }
+    .fb {
+      padding: 6px 13px; border: 1px solid var(--border2); border-radius: 7px;
+      background: var(--bg2); color: var(--muted); font-size: 0.74rem; font-weight: 600;
+      cursor: pointer; transition: all .15s; white-space: nowrap;
+    }
+    .fb:hover { border-color: var(--blue); color: var(--blue); }
+    .fb.on        { background: var(--blue);                                              border-color: var(--blue);   color: #fff; }
+    .fb.on-green  { background: color-mix(in srgb, var(--green) 15%, transparent);       border-color: var(--green);  color: var(--green); }
+    .fb.on-yellow { background: color-mix(in srgb, var(--yellow) 15%, transparent);      border-color: var(--yellow); color: var(--yellow); }
+    .fb.on-orange { background: color-mix(in srgb, var(--orange) 15%, transparent);      border-color: var(--orange); color: var(--orange); }
+    .fb.on-red    { background: color-mix(in srgb, var(--red) 15%, transparent);         border-color: var(--red);    color: var(--red); }
+    .fb.on-gray   { background: color-mix(in srgb, var(--muted2) 10%, transparent);      border-color: var(--muted2); color: var(--muted); }
+    .sort-sel {
+      padding: 7px 10px; background: var(--bg2); border: 1px solid var(--border2);
+      border-radius: 8px; color: var(--text); font-size: 0.77rem; outline: none; cursor: pointer;
+      margin-left: auto;
+    }
+
+    /* ── TABLE ── */
+    .tbl-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.84rem; }
+    thead th {
+      background: var(--surface); color: var(--muted);
+      font-size: 0.66rem; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 700;
+      padding: 10px 16px; text-align: left; border-bottom: 1px solid var(--border);
+      white-space: nowrap; user-select: none; position: sticky; top: 0; z-index: 1;
+    }
+    tbody tr { border-bottom: 1px solid var(--border); transition: background .1s; }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: rgba(79,142,247,.04); }
+    td { padding: 11px 16px; white-space: nowrap; vertical-align: middle; }
+    td.dom { font-family: 'SF Mono','Fira Code','Roboto Mono',monospace; font-size: 0.8rem; font-weight: 500; }
+    td.dom a { color: var(--text); text-decoration: none; transition: color 0.15s; }
+    td.dom a:hover { color: var(--blue); }
+
+    .badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 99px; font-size: 0.68rem; font-weight: 700; white-space: nowrap; border: 1px solid transparent; }
+    .b-green  { background: color-mix(in srgb, var(--green) 12%, transparent);  color: var(--green);  border-color: color-mix(in srgb, var(--green) 35%, transparent); }
+    .b-yellow { background: color-mix(in srgb, var(--yellow) 12%, transparent); color: var(--yellow); border-color: color-mix(in srgb, var(--yellow) 35%, transparent); }
+    .b-orange { background: color-mix(in srgb, var(--orange) 12%, transparent); color: var(--orange); border-color: color-mix(in srgb, var(--orange) 35%, transparent); }
+    .b-red    { background: color-mix(in srgb, var(--red) 12%, transparent);    color: var(--red);    border-color: color-mix(in srgb, var(--red) 35%, transparent); }
+    .b-gray   { background: color-mix(in srgb, var(--muted) 10%, transparent);  color: var(--muted);  border-color: color-mix(in srgb, var(--muted) 20%, transparent); }
+
+    .bar-wrap { display: flex; align-items: center; gap: 8px; min-width: 120px; }
+    .bar      { flex: 1; height: 4px; background: var(--border2); border-radius: 2px; overflow: hidden; min-width: 60px; }
+    .bar-fill { height: 100%; border-radius: 2px; }
+    .bar-num  { font-size: 0.77rem; font-weight: 700; min-width: 44px; text-align: right; font-variant-numeric: tabular-nums; }
+    .pi { display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; border-radius: 5px; font-size: 0.57rem; font-weight: 800; margin-right: 7px; vertical-align: middle; flex-shrink: 0; }
+
+    .no-rows { text-align: center; padding: 60px 20px; color: var(--muted); display: none; font-size: 0.875rem; }
+
+    /* ── LOADING ── */
+    .loading { position: fixed; inset: 0; background: var(--bg); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; z-index: 300; transition: background 0.2s; }
+    .spinner { width: 40px; height: 40px; border: 3px solid var(--border2); border-top-color: var(--blue); border-radius: 50%; animation: spin .7s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading p { color: var(--muted); font-size: 0.84rem; }
+
+    @media (max-width: 768px) {
+      /* Two-row topbar: [brand … toggle pill] / [nav tabs] */
+      .topbar {
+        padding: 0 14px;
+        height: auto;
+        min-height: 54px;
+        flex-wrap: wrap;
+        align-items: center;
+        row-gap: 0;
+      }
+      .brand { margin-right: auto; margin-bottom: 0; flex-shrink: 0; }
+      .brand-sub { display: none; }
+      /* Toggle + pill sit right of brand on row 1 */
+      .topbar-right { order: 2; margin-left: 12px; gap: 8px; flex-shrink: 0; }
+      /* Nav tabs fill row 2 */
+      .nav-tabs {
+        order: 3;
+        width: 100%;
+        height: 42px;
+        border-top: 1px solid var(--border);
+        flex: none;
+      }
+      .nav-tab { padding: 0 16px; font-size: 0.8rem; flex: 1; justify-content: center; }
+      .nav-tab::after { left: 12px; right: 12px; }
+      /* Always show tab labels on tablet */
+      .nav-tab-label { display: inline; }
+      .page { padding: 14px 12px 40px; }
+      td, th { padding: 8px 10px; }
+      td.dom { white-space: normal; word-break: break-all; }
+      .stats-row { grid-template-columns: repeat(3,1fr); }
+      .controls { flex-direction: column; align-items: stretch; gap: 8px; }
+      .search-wrap { max-width: 100%; }
+      .sort-sel { margin-left: 0; width: 100%; }
+      .bar-wrap { min-width: 90px; }
+      .bar { min-width: 40px; }
+      .updated-pill { padding: 4px 10px; font-size: 0.68rem; }
+      .site-footer { padding: 20px 16px 18px; }
+    }
+    @media (max-width: 480px) {
+      .stats-row { grid-template-columns: repeat(2,1fr); }
+      /* Switch to short tab labels on small screens */
+      .nav-tab { font-size: 0.75rem; padding: 0 10px; }
+      .nav-tab-long { display: none; }
+      .nav-tab-short { display: inline; }
+      /* Hide timestamp text and toggle label on tiny screens, keep icons */
+      .updated-pill span:not(.live-dot) { display: none; }
+      .theme-label { display: none; }
+      /* Hide less-critical table columns */
+      .ssl-col-issued, .ssl-col-provider { display: none; }
+      .dom-col-registrar { display: none; }
+      /* Allow wrapping so nothing causes horizontal scroll */
+      td, th { padding: 7px 8px; font-size: 0.76rem; white-space: normal; }
+      td.dom { white-space: normal; word-break: break-all; }
+      /* Drop progress bar, keep day count only */
+      .bar { display: none; }
+      .bar-wrap { min-width: unset; gap: 0; }
+      .bar-num { min-width: unset; font-size: 0.74rem; }
+    }
+
+    /* ── FOOTER ── */
+    .site-footer {
+      text-align: center; padding: 28px 32px 24px;
+      border-top: 1px solid var(--border);
+      color: var(--muted); font-size: 0.78rem;
+      margin-top: 40px;
+    }
+    .site-footer strong { color: var(--text); font-weight: 600; }
+    .site-footer a { color: var(--blue); text-decoration: none; }
+    .site-footer a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+
+<div class="loading" id="loading">
+  <div class="spinner"></div>
+  <p>Loading monitor data…</p>
+</div>
+
+<header class="topbar">
+  <div class="brand">
+    <div style="display:flex;flex-direction:column;gap:2px;">
+      <svg class="brand-logo" viewBox="0 0 160 36" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="webLankan">
+        <!-- "web" in red -->
+        <text x="0" y="27" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif" font-size="26" font-weight="800" fill="#e31e24" letter-spacing="-1">web</text>
+        <!-- "Lankan" in current text color -->
+        <text x="50" y="27" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif" font-size="26" font-weight="800" fill="var(--text)" letter-spacing="-1">Lankan</text>
+        <!-- cursor dot in red -->
+        <rect x="150" y="25" width="5" height="5" fill="#e31e24" rx="1"/>
+      </svg>
+      <div class="brand-sub">Monitor</div>
+    </div>
+  </div>
+
+  <nav class="nav-tabs">
+    <button class="nav-tab active" id="tab-ssl-btn" onclick="switchTab('ssl')">
+      <span class="nav-tab-label nav-tab-long">SSL Certificates</span>
+      <span class="nav-tab-label nav-tab-short">SSL</span>
+      <span class="nav-badge" id="ssl-tab-count">—</span>
+    </button>
+    <button class="nav-tab" id="tab-domain-btn" onclick="switchTab('domain')">
+      <span class="nav-tab-label nav-tab-long">Domain Registrations</span>
+      <span class="nav-tab-label nav-tab-short">Domains</span>
+      <span class="nav-badge" id="dom-tab-count">—</span>
+    </button>
+  </nav>
+
+  <div class="topbar-right">
+    <button class="theme-toggle" id="theme-toggle" title="Toggle dark/light mode"><span id="theme-icon">🌙</span><span class="theme-label" id="theme-label">Dark</span></button>
+    <div class="updated-pill">
+      <div class="live-dot"></div>
+      <span id="last-updated">Loading…</span>
+    </div>
+  </div>
+</header>
+
+<main class="page">
+
+  <!-- SSL Panel -->
+  <div class="tab-panel active" id="panel-ssl">
+    <div class="stats-row" id="ssl-stats"></div>
+    <div class="table-card">
+      <div class="controls">
+        <div class="search-wrap">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="search" id="ssl-search" placeholder="Search domain or provider…" />
+        </div>
+        <div class="filter-group" id="ssl-filters">
+          <button class="fb on" data-f="all">All</button>
+          <button class="fb" data-f="valid"   data-cls="on-green">Valid</button>
+          <button class="fb" data-f="warn"    data-cls="on-yellow">≤ 30d</button>
+          <button class="fb" data-f="urgent"  data-cls="on-orange">≤ 7d</button>
+          <button class="fb" data-f="expired" data-cls="on-red">Expired</button>
+          <button class="fb" data-f="error"   data-cls="on-gray">Errors</button>
+        </div>
+        <select class="sort-sel" id="ssl-sort">
+          <option value="days_asc">Days Left ↑</option>
+          <option value="days_desc">Days Left ↓</option>
+          <option value="domain_asc">Domain A–Z</option>
+          <option value="provider_asc">Provider A–Z</option>
+          <option value="expires_asc">Expiry Date ↑</option>
+        </select>
+      </div>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr>
+            <th>Domain</th><th class="ssl-col-provider">Provider</th><th class="ssl-col-issued">Issued On</th><th>Expires On</th><th>Days Left</th><th>Status</th>
+          </tr></thead>
+          <tbody id="ssl-tbody"></tbody>
+        </table>
+        <div class="no-rows" id="ssl-norows">No results match your filter.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Domain Panel -->
+  <div class="tab-panel" id="panel-domain">
+    <div class="stats-row" id="dom-stats"></div>
+    <div class="table-card">
+      <div class="controls">
+        <div class="search-wrap">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="search" id="dom-search" placeholder="Search domain or registrar…" />
+        </div>
+        <div class="filter-group" id="dom-filters">
+          <button class="fb on" data-f="all">All</button>
+          <button class="fb" data-f="active"  data-cls="on-green">Active</button>
+          <button class="fb" data-f="warning" data-cls="on-yellow">≤ 30d</button>
+          <button class="fb" data-f="urgent"  data-cls="on-orange">≤ 7d</button>
+          <button class="fb" data-f="expired" data-cls="on-red">Expired</button>
+        </div>
+        <select class="sort-sel" id="dom-sort">
+          <option value="days_asc">Days Left ↑</option>
+          <option value="days_desc">Days Left ↓</option>
+          <option value="domain_asc">Domain A–Z</option>
+          <option value="registrar_asc">Registrar A–Z</option>
+          <option value="expires_asc">Expiry Date ↑</option>
+        </select>
+      </div>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr>
+            <th>Domain</th><th class="dom-col-registrar">Registrar</th><th>Expiry Date</th><th>Days Left</th><th>Status</th>
+          </tr></thead>
+          <tbody id="dom-tbody"></tbody>
+        </table>
+        <div class="no-rows" id="dom-norows">No results match your filter.</div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<script>
+const $ = id => document.getElementById(id);
+
+const PROV = {
+  "Let's Encrypt":    { bg:"#16a34a22", c:"#22c55e", ab:"LE" },
+  "Cloudflare SSL":   { bg:"#f9731622", c:"#fb923c", ab:"CF" },
+  "Sectigo / Comodo": { bg:"#3b82f622", c:"#60a5fa", ab:"SC" },
+  "DigiCert":         { bg:"#8b5cf622", c:"#a78bfa", ab:"DC" },
+  "GeoTrust":         { bg:"#0ea5e922", c:"#38bdf8", ab:"GT" },
+  "GlobalSign":       { bg:"#6366f122", c:"#818cf8", ab:"GS" },
+  "GoDaddy":          { bg:"#10b98122", c:"#34d399", ab:"GD" },
+  "Amazon / AWS":     { bg:"#ec489922", c:"#f472b6", ab:"AW" },
+  "ZeroSSL":          { bg:"#64748b22", c:"#94a3b8", ab:"ZS" },
+};
+const REGR = {
+  "GoDaddy":    { bg:"#10b98122", c:"#34d399", ab:"GD" },
+  "domains.lk": { bg:"#3b82f622", c:"#60a5fa", ab:"DL" },
+  "Namecheap":  { bg:"#f9731622", c:"#fb923c", ab:"NC" },
+  "Hostpoint":  { bg:"#8b5cf622", c:"#a78bfa", ab:"HP" },
+  "Cloudflare": { bg:"#f9731622", c:"#f97316", ab:"CF" },
+};
+function ps(map, name) {
+  return map[name] || { bg:"#6b728022", c:"#9ca3af", ab:(name||"?").slice(0,2).toUpperCase() };
+}
+
+function daysBar(days, max) {
+  if (days == null) return `<span style="color:var(--muted2);font-size:.75rem">N/A</span>`;
+  const pct = Math.max(0, Math.min(100, (days / max) * 100));
+  const col = days <= 0 ? "var(--red)" : days <= 7 ? "var(--orange)" : days <= 30 ? "var(--yellow)" : "var(--green)";
+  return `<div class="bar-wrap"><div class="bar"><div class="bar-fill" style="width:${pct}%;background:${col}"></div></div><span class="bar-num" style="color:${col}">${days}d</span></div>`;
+}
+
+function statsHTML(items) {
+  return items.map(s => `<div class="stat-card ${s.cls}"><div class="stat-lbl">${s.label}</div><div class="stat-val">${s.val}</div>${s.sub?`<div class="stat-sub">${s.sub}</div>`:''}</div>`).join('');
+}
+
+/* SSL */
+let sslData=[], sslFilter="all", sslSearch="", sslSort="days_asc";
+function sslCat(r) {
+  if (r.status==="expired") return "expired";
+  if (r.status==="invalid") return "invalid";
+  if (r.status==="valid") { if(r.days_left<=7) return "urgent"; if(r.days_left<=30) return "warn"; return "valid"; }
+  return "error";
+}
+function sslBadge(r) {
+  const m={valid:["b-green","✓ Valid"],warn:["b-yellow","⚠ Warning"],urgent:["b-orange","⚡ Urgent"],expired:["b-red","✗ Expired"],invalid:["b-yellow","⚠ Invalid"],error:["b-gray","— "+(r.status||"Error")]};
+  const [cls,lbl]=m[sslCat(r)]||["b-gray",r.status];
+  return `<span class="badge ${cls}">${lbl}</span>`;
+}
+function renderSSL() {
+  let data=[...sslData];
+  if(sslFilter!=="all") data=data.filter(r=>sslCat(r)===sslFilter);
+  if(sslSearch){const q=sslSearch;data=data.filter(r=>r.domain.includes(q)||(r.provider||"").toLowerCase().includes(q));}
+  const sslRank=r=>{const s=r.status;const cat=sslCat(r);return s==="dns_error"?0:s==="timeout"?1:s==="expired"?2:(s==="ssl_error"||s==="no_https"||cat==="error")?3:(cat==="urgent"||cat==="warn")?4:s==="invalid"?5:6;};
+  data.sort((a,b)=>{
+    if(sslSort==="days_asc"){const ra=sslRank(a),rb=sslRank(b);if(ra!==rb)return ra-rb;if(a.days_left==null&&b.days_left==null)return 0;if(a.days_left==null)return -1;if(b.days_left==null)return 1;return a.days_left-b.days_left;}
+    if(sslSort==="days_desc"){const ra=sslRank(a),rb=sslRank(b);if(ra!==rb)return ra-rb;if(a.days_left==null&&b.days_left==null)return 0;if(a.days_left==null)return -1;if(b.days_left==null)return 1;return b.days_left-a.days_left;}
+    if(sslSort==="domain_asc")return a.domain.localeCompare(b.domain);
+    if(sslSort==="provider_asc")return(a.provider||"").localeCompare(b.provider||"");
+    if(sslSort==="expires_asc")return(a.expires_on||"").localeCompare(b.expires_on||"");
+    return 0;
+  });
+  $("ssl-tbody").innerHTML=data.map(r=>{
+    const p=ps(PROV,r.provider);
+    const tip=r.error?` title="${r.error.replace(/"/g,'&quot;')}"` :"";
+    return`<tr><td class="dom"${tip}><a href="https://${r.domain}" target="_blank" rel="noopener">${r.domain}</a></td><td class="ssl-col-provider"><span class="pi" style="background:${p.bg};color:${p.c}">${p.ab}</span>${r.provider||'N/A'}</td><td class="ssl-col-issued" style="color:var(--muted)">${r.issued_on||'—'}</td><td style="color:var(--muted)">${r.expires_on||'—'}</td><td>${daysBar(r.days_left,365)}</td><td>${sslBadge(r)}</td></tr>`;
+  }).join("");
+  $("ssl-norows").style.display=data.length?"none":"block";
+}
+
+/* Domains */
+let domData=[], domFilter="all", domSearch="", domSort="days_asc";
+function domBadge(r) {
+  const m={active:["b-green","✓ Active"],warning:["b-yellow","⚠ Warning"],urgent:["b-orange","⚡ Urgent"],expired:["b-red","✗ Expired"],unknown:["b-gray","— Unknown"]};
+  const [cls,lbl]=m[r.status]||["b-gray",r.status];
+  return `<span class="badge ${cls}">${lbl}</span>`;
+}
+function renderDom() {
+  let data=[...domData];
+  if(domFilter!=="all") data=data.filter(r=>r.status===domFilter);
+  if(domSearch){const q=domSearch;data=data.filter(r=>r.domain.includes(q)||(r.registrar||"").toLowerCase().includes(q));}
+  const domRank=r=>r.status==="unknown"?0:r.status==="expired"?1:r.status==="urgent"?2:r.status==="warning"?3:4;
+  data.sort((a,b)=>{
+    if(domSort==="days_asc"){const ra=domRank(a),rb=domRank(b);if(ra!==rb)return ra-rb;if(a.days_left==null&&b.days_left==null)return 0;if(a.days_left==null)return -1;if(b.days_left==null)return 1;return a.days_left-b.days_left;}
+    if(domSort==="days_desc"){const ra=domRank(a),rb=domRank(b);if(ra!==rb)return ra-rb;if(a.days_left==null&&b.days_left==null)return 0;if(a.days_left==null)return -1;if(b.days_left==null)return 1;return b.days_left-a.days_left;}
+    if(domSort==="domain_asc")return a.domain.localeCompare(b.domain);
+    if(domSort==="registrar_asc")return(a.registrar||"").localeCompare(b.registrar||"");
+    if(domSort==="expires_asc")return(a.expiry_date||"").localeCompare(b.expiry_date||"");
+    return 0;
+  });
+  $("dom-tbody").innerHTML=data.map(r=>{
+    const s=ps(REGR,r.registrar);
+    return`<tr><td class="dom"><a href="https://${r.domain}" target="_blank" rel="noopener">${r.domain}</a></td><td class="dom-col-registrar"><span class="pi" style="background:${s.bg};color:${s.c}">${s.ab}</span>${r.registrar||'—'}</td><td style="color:var(--muted)">${r.expiry_date||'—'}</td><td>${daysBar(r.days_left,730)}</td><td>${domBadge(r)}</td></tr>`;
+  }).join("");
+  $("dom-norows").style.display=data.length?"none":"block";
+}
+
+/* Tab switch */
+function switchTab(name) {
+  ["ssl","domain"].forEach(t=>{
+    $(`panel-${t}`).classList.toggle("active", t===name);
+    $(`tab-${t}-btn`).classList.toggle("active", t===name);
+  });
+}
+
+/* Filter wiring */
+function wireFilters(groupId, setFilter, render) {
+  document.querySelectorAll(`#${groupId} .fb`).forEach(btn=>{
+    btn.addEventListener("click",()=>{
+      document.querySelectorAll(`#${groupId} .fb`).forEach(b=>b.className="fb");
+      setFilter(btn.dataset.f);
+      btn.classList.add(btn.dataset.cls||"on");
+      render();
+    });
+  });
+}
+
+/* Init */
+async function init() {
+  const [sslRes,domRes]=await Promise.allSettled([
+    fetch("ssl_results.json?t="+Date.now()).then(r=>r.json()),
+    fetch("domain_results.json?t="+Date.now()).then(r=>r.json()),
+  ]);
+  if(sslRes.status==="fulfilled"){
+    const d=sslRes.value; sslData=d.results||[];
+    const cats=sslData.map(sslCat), c=x=>cats.filter(v=>v===x).length;
+    $("ssl-stats").innerHTML=statsHTML([
+      {cls:"sc-total", label:"Total",       val:sslData.length, sub:"monitored"},
+      {cls:"sc-ok",    label:"Valid",        val:c("valid"),    sub:"> 30 days left"},
+      {cls:"sc-warn",  label:"Warning",      val:c("warn"),     sub:"≤ 30 days"},
+      {cls:"sc-urgent",label:"Urgent",       val:c("urgent"),   sub:"≤ 7 days"},
+      {cls:"sc-exp",   label:"Expired",      val:c("expired"),  sub:"action needed"},
+      {cls:"sc-err",   label:"Unreachable",  val:c("error"),    sub:"DNS / timeout"},
+    ]);
+    $("ssl-tab-count").textContent=sslData.length;
+    $("last-updated").textContent=d.generated_at||"—";
+    renderSSL();
+  }
+  if(domRes.status==="fulfilled"){
+    const d=domRes.value; domData=d.results||[];
+    $("dom-stats").innerHTML=statsHTML([
+      {cls:"sc-total", label:"Total",   val:domData.length, sub:"monitored"},
+      {cls:"sc-ok",    label:"Active",  val:d.active||0,    sub:"> 30 days left"},
+      {cls:"sc-warn",  label:"Warning", val:d.warning||0,   sub:"≤ 30 days"},
+      {cls:"sc-urgent",label:"Urgent",  val:d.urgent||0,    sub:"≤ 7 days"},
+      {cls:"sc-exp",   label:"Expired", val:d.expired||0,   sub:"action needed"},
+    ]);
+    $("dom-tab-count").textContent=domData.length;
+    renderDom();
+  }
+  $("loading").style.display="none";
+}
+
+wireFilters("ssl-filters", v=>sslFilter=v, renderSSL);
+wireFilters("dom-filters",  v=>domFilter=v, renderDom);
+$("ssl-search").addEventListener("input",e=>{sslSearch=e.target.value.trim().toLowerCase();renderSSL();});
+$("dom-search").addEventListener("input",e=>{domSearch=e.target.value.trim().toLowerCase();renderDom();});
+$("ssl-sort").addEventListener("change",e=>{sslSort=e.target.value;renderSSL();});
+$("dom-sort").addEventListener("change",e=>{domSort=e.target.value;renderDom();});
+
+/* Theme toggle */
+(function(){
+  const btn = $("theme-toggle");
+  const icon = $("theme-icon");
+  const label = $("theme-label");
+  const saved = localStorage.getItem("theme") || "dark";
+  function applyTheme(t){
+    document.documentElement.setAttribute("data-theme", t);
+    icon.textContent = t === "dark" ? "🌙" : "☀️";
+    label.textContent = t === "dark" ? "Dark" : "Light";
+    localStorage.setItem("theme", t);
+  }
+  applyTheme(saved);
+  btn.addEventListener("click", ()=>{
+    const cur = document.documentElement.getAttribute("data-theme");
+    applyTheme(cur === "dark" ? "light" : "dark");
+  });
+})();
+
+init();
+</script>
+
+<footer class="site-footer">
+  Created by <strong>Lahiru Sandaruwan</strong> &mdash; DevOps 2026
+</footer>
+</body>
+</html>

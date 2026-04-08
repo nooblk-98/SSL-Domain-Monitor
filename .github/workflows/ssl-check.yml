@@ -1,0 +1,54 @@
+name: SSL Certificate Check
+
+on:
+  push:
+    branches: main
+  schedule:
+    # Runs every day at 06:00 Asia/Colombo (UTC+5:30) = 00:30 UTC
+    - cron: "30 0 * * *"
+  workflow_dispatch:  # Allow manual trigger from GitHub UI
+
+permissions:
+  contents: write   # needed to commit ssl_results.json back to the repo
+
+jobs:
+  check-ssl:
+    name: Check SSL Certificates
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install cryptography
+
+      - name: Validate config files
+        run: python3 src/validate_conf.py --no-dns
+
+      - name: Run SSL checker
+        run: python3 src/ssl/scripts/check_ssl.py
+
+      - name: Run domain expiry checker
+        run: python3 src/domain/scripts/check_domains.py
+
+      - name: Commit updated results
+        run: |
+          git config user.name  "NoobLk"
+          git config user.email "liyanagelsofficial@gmail.com"
+          git add ssl_results.json domain_results.json ssl.conf domains.conf
+          # Only commit if there are changes
+          git diff --cached --quiet || git commit -m "chore: update SSL & domain results [$(date -u '+%Y-%m-%d %H:%M UTC')]"
+          git push
+
+      - name: Deploy to Cloudflare Pages
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy . --project-name=ssl-checker --branch=main
