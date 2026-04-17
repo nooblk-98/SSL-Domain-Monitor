@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-04-16 01:08 UTC",
+  "generated_at": "2026-04-17 01:07 UTC",
   "total_domains": 10,
   "active": 10,
   "warning": 0,
@@ -11,7 +11,7 @@
       "registrar": "MarkMonitor Inc.",
       "purchase_date": "N/A",
       "expiry_date": "2026-10-31",
-      "days_left": 197,
+      "days_left": 196,
       "status": "active"
     },
     {
@@ -19,7 +19,7 @@
       "registrar": "MarkMonitor Inc.",
       "purchase_date": "N/A",
       "expiry_date": "2026-11-02",
-      "days_left": 199,
+      "days_left": 198,
       "status": "active"
     },
     {
@@ -27,7 +27,7 @@
       "registrar": "MarkMonitor Inc.",
       "purchase_date": "N/A",
       "expiry_date": "2027-01-13",
-      "days_left": 271,
+      "days_left": 270,
       "status": "active"
     },
     {
@@ -35,7 +35,7 @@
       "registrar": "CSC Corporate Domains, Inc.",
       "purchase_date": "N/A",
       "expiry_date": "2027-01-21",
-      "days_left": 279,
+      "days_left": 278,
       "status": "active"
     },
     {
@@ -43,7 +43,7 @@
       "registrar": "MarkMonitor Inc.",
       "purchase_date": "N/A",
       "expiry_date": "2027-02-15",
-      "days_left": 304,
+      "days_left": 303,
       "status": "active"
     },
     {
@@ -51,7 +51,7 @@
       "registrar": "MarkMonitor Inc.",
       "purchase_date": "N/A",
       "expiry_date": "2027-11-10",
-      "days_left": 572,
+      "days_left": 571,
       "status": "active"
     },
     {
@@ -59,7 +59,7 @@
       "registrar": "MarkMonitor Inc.",
       "purchase_date": "N/A",
       "expiry_date": "2028-04-29",
-      "days_left": 743,
+      "days_left": 742,
       "status": "active"
     },
     {
@@ -67,7 +67,7 @@
       "registrar": "MarkMonitor Inc.",
       "purchase_date": "N/A",
       "expiry_date": "2028-09-14",
-      "days_left": 881,
+      "days_left": 880,
       "status": "active"
     },
     {
@@ -75,7 +75,7 @@
       "registrar": "RegistrarSafe, LLC",
       "purchase_date": "N/A",
       "expiry_date": "2034-03-30",
-      "days_left": 2904,
+      "days_left": 2903,
       "status": "active"
     },
     {
@@ -83,7 +83,7 @@
       "registrar": "RegistrarSafe, LLC",
       "purchase_date": "N/A",
       "expiry_date": "2034-06-04",
-      "days_left": 2970,
+      "days_left": 2969,
       "status": "active"
     }
   ]
