@@ -1,4 +1,4 @@
-# DOMAIN + SSL status checker
+# certiwatch
 
 
 ### SSL Certificates
@@ -9,7 +9,7 @@
 
 ---
 
-webLankan SSL Checker is a lightweight monitoring toolkit for:
+certiwatch is a lightweight monitoring toolkit for:
 
 - SSL/TLS certificate health checks
 - Domain expiry tracking
@@ -212,5 +212,5 @@ Add these secrets to your repository under **Settings → Secrets and variables 
 
 The dashboard is deployed to Cloudflare Pages and updates automatically after each workflow run:
 
-**https://ssl-domain-monitor.pages.dev**
+**https://certiwatch.pages.dev**
 
