@@ -9,21 +9,24 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg:      #0f172a;
-      --bg2:     #1e293b;
+      --bg:      #020617;
+      --bg2:     #0f172a;
       --surface: #1e293b;
-      --card:    #1e293b;
-      --border:  #334155;
-      --border2: #475569;
-      --text:    #f1f5f9;
+      --card:    #0f172a;
+      --border:  #1e293b;
+      --border2: #334155;
+      --text:    #f8fafc;
       --muted:   #94a3b8;
       --muted2:  #64748b;
       --green:   #10b981;
       --yellow:  #f59e0b;
       --orange:  #f97316;
       --red:     #ef4444;
-      --blue:    #6366f1;
+      --blue:    #3b82f6;
+      --cyan:    #06b6d4;
       --purple:  #8b5cf6;
+      --accent:  #3b82f6;
+      --shadow:  rgba(0, 0, 0, 0.4);
     }
     [data-theme="light"] {
       --bg:      #f8fafc;
@@ -35,12 +38,15 @@
       --text:    #0f172a;
       --muted:   #64748b;
       --muted2:  #94a3b8;
-      --green:   #10b981;
+      --green:   #059669;
       --yellow:  #d97706;
-      --orange:  #ea6c0a;
+      --orange:  #ea580c;
       --red:     #dc2626;
-      --blue:    #6366f1;
-      --purple:  #8b5cf6;
+      --blue:    #2563eb;
+      --cyan:    #0891b2;
+      --purple:  #7c3aed;
+      --accent:  #2563eb;
+      --shadow:  rgba(0, 0, 0, 0.05);
     }
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; -webkit-font-smoothing: antialiased; transition: background 0.2s, color 0.2s; }
@@ -70,21 +76,21 @@
     .theme-toggle:hover { border-color: var(--blue); color: var(--text); background: var(--border); }
     .brand { display: flex; align-items: center; gap: 12px; flex-shrink: 0; margin-right: 32px; }
     .brand-logo { height: 32px; width: auto; display: block; flex-shrink: 0; }
-    .brand-sub  { font-size: 0.65rem; color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase; font-weight: 700; }
+    .brand-sub  { font-size: 0.6rem; color: var(--muted); letter-spacing: 0.15em; text-transform: uppercase; font-weight: 800; }
 
-    .nav-tabs { display: flex; align-items: stretch; height: 64px; gap: 4px; flex: 1; }
+    .nav-tabs { display: flex; align-items: stretch; height: 64px; gap: 8px; flex: 1; }
     .nav-tab {
       display: flex; align-items: center; gap: 8px;
-      padding: 0 24px; border: none; background: none;
-      color: var(--muted); font-size: 0.875rem; font-weight: 600;
-      cursor: pointer; position: relative; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); white-space: nowrap;
+      padding: 0 20px; border: none; background: none;
+      color: var(--muted); font-size: 0.9rem; font-weight: 600;
+      cursor: pointer; position: relative; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); white-space: nowrap;
     }
     .nav-tab::after {
-      content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 3px;
-      background: var(--blue); border-radius: 3px 3px 0 0;
-      transform: scaleX(0); transition: transform 0.3s ease;
+      content: ''; position: absolute; bottom: 0; left: 10%; right: 10%; height: 2px;
+      background: var(--blue); border-radius: 2px 2px 0 0;
+      transform: scaleX(0); transition: transform 0.2s ease;
     }
-    .nav-tab.active { color: var(--blue); }
+    .nav-tab.active { color: var(--text); }
     .nav-tab.active::after { transform: scaleX(1); }
     .nav-tab:hover:not(.active) { color: var(--text); }
     .nav-badge {
@@ -120,13 +126,13 @@
       gap: 16px; margin-bottom: 24px;
     }
     .stat-card {
-      background: var(--card); border: 1px solid var(--border); border-radius: 20px;
-      padding: 24px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); position: relative; overflow: hidden;
-      transition: all 0.3s ease;
+      background: var(--card); border: 1px solid var(--border); border-radius: 16px;
+      padding: 24px; box-shadow: 0 4px 20px -5px var(--shadow); position: relative; overflow: hidden;
+      transition: all 0.2s ease;
     }
-    .stat-card:hover { transform: translateY(-4px); border-color: var(--blue); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); }
+    .stat-card:hover { transform: translateY(-2px); border-color: var(--border2); box-shadow: 0 10px 25px -5px var(--shadow); }
     .stat-card::before {
-      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; border-radius: 20px 20px 0 0;
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
     }
     .sc-total::before  { background: var(--blue); }
     .sc-ok::before     { background: var(--green); }
@@ -134,8 +140,8 @@
     .sc-urgent::before { background: var(--orange); }
     .sc-exp::before    { background: var(--red); }
     .sc-err::before    { background: var(--muted2); }
-    .stat-lbl { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.12em; color: var(--muted); margin-bottom: 10px; font-weight: 700; }
-    .stat-val { font-size: 2.25rem; font-weight: 800; line-height: 1.1; letter-spacing: -0.025em; }
+    .stat-lbl { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); margin-bottom: 8px; font-weight: 600; }
+    .stat-val { font-size: 2.5rem; font-weight: 700; line-height: 1.1; letter-spacing: -0.04em; }
     .sc-total  .stat-val { color: var(--blue); }
     .sc-ok     .stat-val { color: var(--green); }
     .sc-warn   .stat-val { color: var(--yellow); }
@@ -145,7 +151,7 @@
     .stat-sub { font-size: 0.7rem; color: var(--muted2); margin-top: 6px; font-weight: 500; }
 
     /* ── TABLE CARD ── */
-    .table-card { background: var(--card); border: 1px solid var(--border); border-radius: 20px; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); overflow: hidden; }
+    .table-card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; box-shadow: 0 10px 30px -10px var(--shadow); overflow: hidden; }
     .controls {
       display: flex; gap: 12px; flex-wrap: wrap; align-items: center;
       padding: 16px 20px; border-bottom: 1px solid var(--border); background: var(--bg2);
@@ -161,11 +167,11 @@
     input[type="search"]::placeholder { color: var(--muted2); }
     .filter-group { display: flex; gap: 6px; flex-wrap: wrap; }
     .fb {
-      padding: 9px 18px; border: 1px solid var(--border); border-radius: 12px;
+      padding: 8px 16px; border: 1px solid var(--border); border-radius: 10px;
       background: var(--bg); color: var(--muted); font-size: 0.75rem; font-weight: 600;
       cursor: pointer; transition: all .2s ease; white-space: nowrap;
     }
-    .fb:hover { border-color: var(--blue); color: var(--text); background: var(--border); }
+    .fb:hover { border-color: var(--border2); color: var(--text); background: var(--bg2); }
     .fb.on        { background: var(--blue);                                              border-color: var(--blue);   color: #fff; }
     .fb.on-green  { background: color-mix(in srgb, var(--green) 15%, transparent);       border-color: var(--green);  color: var(--green); }
     .fb.on-yellow { background: color-mix(in srgb, var(--yellow) 15%, transparent);      border-color: var(--yellow); color: var(--yellow); }
@@ -174,29 +180,29 @@
     .fb.on-gray   { background: color-mix(in srgb, var(--muted2) 10%, transparent);      border-color: var(--muted2); color: var(--muted); }
     .sort-sel {
       padding: 8px 12px; background: var(--bg); border: 1px solid var(--border);
-      border-radius: 12px; color: var(--text); font-size: 0.8rem; outline: none; cursor: pointer;
+      border-radius: 10px; color: var(--text); font-size: 0.8rem; outline: none; cursor: pointer;
       margin-left: auto; transition: all 0.2s ease;
     }
-    .sort-sel:hover { border-color: var(--blue); }
+    .sort-sel:hover { border-color: var(--border2); background: var(--bg2); }
 
     /* ── TABLE ── */
     .tbl-wrap { overflow-x: auto; }
     table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
     thead th {
       background: var(--bg2); color: var(--muted);
-      font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.1em; font-weight: 700;
-      padding: 14px 20px; text-align: left; border-bottom: 1px solid var(--border);
+      font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600;
+      padding: 16px 20px; text-align: left; border-bottom: 1px solid var(--border);
       white-space: nowrap; user-select: none; position: sticky; top: 0; z-index: 1;
     }
-    tbody tr { border-bottom: 1px solid var(--border); transition: all 0.2s ease; }
+    tbody tr { border-bottom: 1px solid var(--border); transition: background 0.15s ease; }
     tbody tr:last-child { border-bottom: none; }
-    tbody tr:hover { background: color-mix(in srgb, var(--blue) 5%, transparent); }
+    tbody tr:hover { background: color-mix(in srgb, var(--blue) 4%, transparent); }
     td { padding: 14px 20px; white-space: nowrap; vertical-align: middle; }
     td.dom { font-family: 'SF Mono','Fira Code','Roboto Mono',monospace; font-size: 0.8rem; font-weight: 500; }
     td.dom a { color: var(--text); text-decoration: none; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
     td.dom a:hover { color: var(--blue); }
 
-    .badge { display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; border-radius: 10px; font-size: 0.75rem; font-weight: 700; white-space: nowrap; border: 1px solid transparent; }
+    .badge { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 8px; font-size: 0.7rem; font-weight: 700; white-space: nowrap; border: 1px solid transparent; }
     .b-green  { background: color-mix(in srgb, var(--green) 10%, transparent);  color: var(--green);  border-color: color-mix(in srgb, var(--green) 20%, transparent); }
     .b-yellow { background: color-mix(in srgb, var(--yellow) 10%, transparent); color: var(--yellow); border-color: color-mix(in srgb, var(--yellow) 20%, transparent); }
     .b-orange { background: color-mix(in srgb, var(--orange) 10%, transparent); color: var(--orange); border-color: color-mix(in srgb, var(--orange) 20%, transparent); }
@@ -204,7 +210,7 @@
     .b-gray   { background: color-mix(in srgb, var(--muted) 10%, transparent);  color: var(--muted);  border-color: color-mix(in srgb, var(--muted) 15%, transparent); }
 
     .bar-wrap { display: flex; align-items: center; gap: 10px; min-width: 140px; }
-    .bar      { flex: 1; height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; min-width: 80px; }
+    .bar      { flex: 1; height: 6px; background: var(--border2); border-radius: 3px; overflow: hidden; min-width: 80px; }
     .bar-fill { height: 100%; border-radius: 3px; }
     .bar-num  { font-size: 0.8rem; font-weight: 700; min-width: 48px; text-align: right; font-variant-numeric: tabular-nums; }
     .pi { display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; border-radius: 5px; font-size: 0.57rem; font-weight: 800; margin-right: 7px; vertical-align: middle; flex-shrink: 0; }
@@ -213,40 +219,41 @@
 
     /* ── LOADING ── */
     .loading { position: fixed; inset: 0; background: var(--bg); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; z-index: 300; transition: background 0.2s; }
-    .spinner { width: 40px; height: 40px; border: 3px solid var(--border2); border-top-color: var(--blue); border-radius: 50%; animation: spin .7s linear infinite; }
+    .spinner { width: 32px; height: 32px; border: 3px solid var(--border); border-top-color: var(--blue); border-radius: 50%; animation: spin .8s cubic-bezier(0.4, 0, 0.2, 1) infinite; }
     @keyframes spin { to { transform: rotate(360deg); } }
     .loading p { color: var(--muted); font-size: 0.84rem; }
 
     @media (max-width: 768px) {
-      /* Two-row topbar: [brand … toggle pill] / [nav tabs] */
       .topbar {
-        padding: 0 16px;
+        padding: 0 12px;
         height: auto;
-        min-height: 56px;
-        flex-wrap: wrap;
+        min-height: 60px;
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .topbar-inner {
+        display: flex;
         align-items: center;
-        row-gap: 0;
+        height: 60px;
+        justify-content: space-between;
       }
-      .brand { margin-right: auto; margin-bottom: 0; flex-shrink: 0; }
+      .brand { margin-right: 0; }
       .brand-sub { display: none; }
-      /* Toggle + pill sit right of brand on row 1 */
-      .topbar-right { order: 2; margin-left: 12px; gap: 10px; flex-shrink: 0; }
-      /* Nav tabs fill row 2 */
+      .topbar-right { margin-left: 0; gap: 8px; }
+
       .nav-tabs {
-        order: 3;
-        width: calc(100% + 32px);
-        margin: 0 -16px;
-        height: 48px;
+        width: 100%;
+        height: 44px;
         border-top: 1px solid var(--border);
-        flex: none;
+        gap: 0;
       }
-      .nav-tab { padding: 0 16px; font-size: 0.8rem; flex: 1; justify-content: center; }
+      .nav-tab { padding: 0 12px; font-size: 0.85rem; flex: 1; justify-content: center; }
       .nav-tab::after { left: 0; right: 0; }
       /* Always show tab labels on tablet */
       .nav-tab-label { display: inline; }
       .page { padding: 14px 12px 40px; }
       td, th { padding: 8px 10px; }
-      td.dom { white-space: normal; word-break: break-all; }
+      td.dom { white-space: normal; overflow-wrap: anywhere; }
       .stats-row { grid-template-columns: repeat(3,1fr); }
       .controls { flex-direction: column; align-items: stretch; gap: 8px; }
       .search-wrap { max-width: 100%; }
@@ -257,24 +264,29 @@
       .site-footer { padding: 20px 16px 18px; }
     }
     @media (max-width: 480px) {
-      .stats-row { grid-template-columns: repeat(2,1fr); }
-      /* Switch to short tab labels on small screens */
-      .nav-tab { font-size: 0.75rem; padding: 0 10px; }
+      .stats-row { grid-template-columns: 1fr 1fr; gap: 10px; }
+      .stat-card { padding: 16px; border-radius: 12px; }
+      .stat-val { font-size: 1.75rem; }
+      .stat-lbl { font-size: 0.6rem; margin-bottom: 4px; }
+
+      .nav-tab { font-size: 0.8rem; padding: 0 8px; }
       .nav-tab-long { display: none; }
       .nav-tab-short { display: inline; }
-      /* Hide timestamp text and toggle label on tiny screens, keep icons */
+
       .updated-pill span:not(.live-dot) { display: none; }
       .theme-label { display: none; }
-      /* Hide less-critical table columns */
+
       .ssl-col-issued, .ssl-col-provider { display: none; }
       .dom-col-registrar { display: none; }
-      /* Allow wrapping so nothing causes horizontal scroll */
-      td, th { padding: 7px 8px; font-size: 0.76rem; white-space: normal; }
-      td.dom { white-space: normal; word-break: break-all; }
-      /* Drop progress bar, keep day count only */
+
+      td, th { padding: 10px 12px; font-size: 0.8rem; }
       .bar { display: none; }
       .bar-wrap { min-width: unset; gap: 0; }
-      .bar-num { min-width: unset; font-size: 0.74rem; }
+      .bar-num { min-width: unset; font-size: 0.8rem; }
+
+      .page { padding: 12px 10px 40px; }
+      .controls { padding: 12px; }
+      .fb { padding: 6px 10px; font-size: 0.7rem; border-radius: 8px; }
     }
 
     /* ── FOOTER ── */
@@ -297,14 +309,23 @@
 </div>
 
 <header class="topbar">
-  <div class="brand">
-    <div style="display:flex;flex-direction:column;gap:2px;">
-      <svg class="brand-logo" viewBox="0 0 260 36" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="SSL+DOMAIN STATUS">
-        <text x="0" y="27" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif" font-size="26" font-weight="800" fill="var(--blue)" letter-spacing="-1">SSL</text>
-        <text x="46" y="27" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif" font-size="26" font-weight="800" fill="var(--text)" letter-spacing="-1">+DOMAIN</text>
+  <div class="topbar-inner">
+    <div class="brand">
+      <div style="display:flex;flex-direction:column;gap:2px;">
+        <svg class="brand-logo" viewBox="0 0 260 36" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="SSL+DOMAIN STATUS">
+          <text x="0" y="27" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif" font-size="26" font-weight="800" fill="var(--blue)" letter-spacing="-1">SSL</text>
+          <text x="46" y="27" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif" font-size="26" font-weight="800" fill="var(--text)" letter-spacing="-1">+DOMAIN</text>
+        </svg>
+        <div class="brand-sub">STATUS</div>
+      </div>
+    </div>
 
-      </svg>
-      <div class="brand-sub">STATUS</div>
+    <div class="topbar-right">
+      <button class="theme-toggle" id="theme-toggle" title="Toggle dark/light mode"><span id="theme-icon">🌙</span><span class="theme-label" id="theme-label">Dark</span></button>
+      <div class="updated-pill">
+        <div class="live-dot"></div>
+        <span id="last-updated">Loading…</span>
+      </div>
     </div>
   </div>
 
@@ -320,14 +341,6 @@
       <span class="nav-badge" id="dom-tab-count">—</span>
     </button>
   </nav>
-
-  <div class="topbar-right">
-    <button class="theme-toggle" id="theme-toggle" title="Toggle dark/light mode"><span id="theme-icon">🌙</span><span class="theme-label" id="theme-label">Dark</span></button>
-    <div class="updated-pill">
-      <div class="live-dot"></div>
-      <span id="last-updated">Loading…</span>
-    </div>
-  </div>
 </header>
 
 <main class="page">
